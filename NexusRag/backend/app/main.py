@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-from app.api import routes_health
+from app.api import routes_chat, routes_documents, routes_health
 from app.core.config import get_settings
 from app.core.logging import get_logger, setup_logging
 
@@ -49,6 +49,8 @@ def create_app() -> FastAPI:
 
     # Register API routers with the version prefix
     application.include_router(routes_health.router, prefix=settings.API_V1_STR)
+    application.include_router(routes_chat.router, prefix=settings.API_V1_STR)
+    application.include_router(routes_documents.router, prefix=settings.API_V1_STR)
 
     return application
 
