@@ -1,0 +1,35 @@
+# NexusRAG Non-Secret Application Configuration
+# Do NOT place API keys, passwords, or tokens in this file!
+# Secrets and runtime overrides belong in .env
+
+rag:
+  chunk_size: 800
+  chunk_overlap: 100
+  top_k: 4
+
+cache:
+  cache_ttl: 3600  # seconds
+
+llm:
+  provider: openrouter
+  model: "google/gemini-2.5-flash"
+  temperature: 0.2
+  max_tokens: 4096
+  timeout: 60        # seconds
+  max_retries: 3
+
+ingestion:
+  max_file_size_mb: 10
+  allowed_extensions:
+    - .pdf
+    - .txt
+    - .md
+
+embeddings:
+  model: "gemini-embedding-2"
+  batch_size: 100
+  output_dimension: 768
+
+vectordb:
+  provider: chroma
+  collection_name: "nexusrag_documents"
