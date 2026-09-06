@@ -74,11 +74,15 @@ class DocumentService:
                 f"configured limit of {max_mb} MB."
             )
 
-    def ingest_file(self, file_path: str | Path) -> List[Document]:
+    def ingest_file(
+        self, file_path: str | Path, original_filename: Optional[str] = None
+    ) -> List[Document]:
         """Ingests, validates, parses, and standardizes a single document.
 
         Args:
             file_path: Path string or Path object pointing to the document.
+            original_filename: Optional original sanitized filename (e.g. before staging).
+                When provided, overrides document source and file_name metadata.
 
         Returns:
             List of structured LangChain Document objects ready for chunking.
@@ -97,6 +101,11 @@ class DocumentService:
             logger.info("Detected file format '%s' for '%s'", path.suffix.lower(), filename)
 
             documents = loader.load(path)
+
+            canonical_name = original_filename or filename
+            for doc in documents:
+                doc.metadata["source"] = canonical_name
+                doc.metadata["file_name"] = canonical_name
 
             # Ensure extractable text exists across the document pages
             has_content = any(doc.page_content.strip() for doc in documents)

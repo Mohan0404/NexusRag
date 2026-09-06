@@ -195,10 +195,21 @@ class GeminiEmbeddingService(BaseEmbeddingService):
             output_dimensionality=self.output_dimension,
         )
 
+        # Google GenAI SDK: A sequence of texts must be passed as individual Content objects
+        # so the model embeds each text individually rather than multiple parts of one content.
+        if isinstance(contents, (list, tuple)):
+            api_contents = [
+                types.Content(parts=[types.Part.from_text(text=str(t))])
+                if isinstance(t, str) else t
+                for t in contents
+            ]
+        else:
+            api_contents = contents
+
         try:
             response = client.models.embed_content(
                 model=self.model,
-                contents=contents,
+                contents=api_contents,
                 config=config,
             )
         except Exception as e:
@@ -309,6 +320,12 @@ class GeminiEmbeddingService(BaseEmbeddingService):
 
         texts = [doc.page_content for doc in documents]
         embeddings = self.embed_texts(texts)
+
+        if len(embeddings) != len(documents):
+            raise EmbeddingProviderError(
+                f"Embedding count mismatch: expected {len(documents)} vectors for "
+                f"{len(documents)} document chunks, but received {len(embeddings)} from embedding provider."
+            )
 
         embedded_chunks: List[EmbeddedChunk] = []
         for doc, vector in zip(documents, embeddings):

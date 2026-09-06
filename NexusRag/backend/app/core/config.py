@@ -152,6 +152,7 @@ class Settings(BaseSettings):
     CORS_ORIGINS: List[str] = [
         "http://localhost:3000",
         "http://localhost:5173",
+        "http://10.13.252.112:5173"
     ]
 
     # LLM Provider & Model Selection (Non-secret environment variables)

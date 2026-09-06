@@ -258,3 +258,111 @@ def test_invalid_configuration() -> None:
 
     with pytest.raises(EmbeddingConfigurationError):
         GeminiEmbeddingService(output_dimension=-50)
+
+
+# =====================================================================
+# Phase 14 / Bug Fix: Multi-Text Batch Embedding Invariant Tests
+# =====================================================================
+
+
+def test_batch_embed_texts_produces_n_vectors(
+    mock_client, embedding_service: GeminiEmbeddingService
+) -> None:
+    """Verify N input texts produce exactly N embedding vectors without drop or truncation."""
+    texts = [f"Text snippet {i}" for i in range(5)]
+    mock_resp = types.EmbedContentResponse(
+        embeddings=[
+            types.ContentEmbedding(values=[float(i)] * 4) for i in range(2)
+        ]
+    )
+    mock_resp_2 = types.EmbedContentResponse(
+        embeddings=[
+            types.ContentEmbedding(values=[float(i)] * 4) for i in range(2, 4)
+        ]
+    )
+    mock_resp_3 = types.EmbedContentResponse(
+        embeddings=[
+            types.ContentEmbedding(values=[4.0] * 4)
+        ]
+    )
+    mock_client.models.embed_content.side_effect = [mock_resp, mock_resp_2, mock_resp_3]
+
+    embeddings = embedding_service.embed_texts(texts)
+
+    assert len(embeddings) == 5
+    for i, vec in enumerate(embeddings):
+        assert len(vec) == 4
+        assert vec[0] == float(i)
+
+    # Verify each call packaged contents as individual types.Content objects
+    for call in mock_client.models.embed_content.call_args_list:
+        contents_arg = call.kwargs["contents"]
+        assert isinstance(contents_arg, list)
+        for item in contents_arg:
+            assert isinstance(item, types.Content)
+            assert len(item.parts) == 1
+            assert isinstance(item.parts[0], types.Part)
+
+
+def test_batch_embed_documents_35_chunks(mock_client) -> None:
+    """Verify 35 Document chunks produce exactly 35 EmbeddedChunk objects with metadata intact."""
+    service = GeminiEmbeddingService(
+        api_key="test-key",
+        batch_size=50,  # Single batch for 35 chunks
+    )
+    docs = [
+        Document(
+            page_content=f"Genworx Roadmap section {i}",
+            metadata={
+                "source": "Genworx_Cracking_Roadmap.md",
+                "chunk_index": i,
+                "chunk_count": 35,
+            },
+        )
+        for i in range(35)
+    ]
+    mock_resp = types.EmbedContentResponse(
+        embeddings=[
+            types.ContentEmbedding(values=[float(i) * 0.1] * 16) for i in range(35)
+        ]
+    )
+    mock_client.models.embed_content.return_value = mock_resp
+
+    embedded_chunks = service.embed_documents(docs)
+
+    assert len(embedded_chunks) == 35
+    for i, chunk in enumerate(embedded_chunks):
+        assert chunk.content == f"Genworx Roadmap section {i}"
+        assert chunk.metadata["source"] == "Genworx_Cracking_Roadmap.md"
+        assert chunk.metadata["chunk_index"] == i
+        assert chunk.metadata["chunk_count"] == 35
+        assert chunk.embedding == [float(i) * 0.1] * 16
+
+
+def test_embedding_count_mismatch_raises_error(mock_client) -> None:
+    """Verify that if Gemini returns fewer embeddings than documents (e.g. 1 instead of 35),
+    EmbeddingProviderError is raised immediately to prevent silent chunk dropping."""
+    service = GeminiEmbeddingService(
+        api_key="test-key",
+        batch_size=50,
+    )
+    docs = [
+        Document(
+            page_content=f"Chunk {i}",
+            metadata={"source": "test.md", "chunk_index": i},
+        )
+        for i in range(35)
+    ]
+    # Simulate Gemini batch bug: 35 input docs, but only 1 embedding returned
+    mock_resp = types.EmbedContentResponse(
+        embeddings=[types.ContentEmbedding(values=[0.1] * 16)]
+    )
+    mock_client.models.embed_content.return_value = mock_resp
+
+    with pytest.raises(EmbeddingProviderError) as excinfo:
+        service.embed_documents(docs)
+
+    assert "Embedding count mismatch" in str(excinfo.value)
+    assert "expected 35 vectors" in str(excinfo.value)
+    assert "received 1" in str(excinfo.value)
+

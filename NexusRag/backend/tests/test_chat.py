@@ -125,6 +125,18 @@ def test_8_excessive_length_question_returns_422(client: TestClient) -> None:
     assert response.status_code == 422
 
 
+def test_8b_exact_maximum_length_question_accepted(
+    client: TestClient, mock_pipeline: MagicMock
+) -> None:
+    """8b. Question of exactly 2,000 characters passes validation and returns 200."""
+    app.dependency_overrides[get_rag_pipeline] = lambda: mock_pipeline
+    exact_question = "q" * 2000
+    response = client.post("/api/v1/chat", json={"question": exact_question})
+
+    assert response.status_code == 200
+    mock_pipeline.query.assert_called_once_with(exact_question)
+
+
 def test_9_no_context_response_returns_200(
     client: TestClient, mock_pipeline: MagicMock
 ) -> None:

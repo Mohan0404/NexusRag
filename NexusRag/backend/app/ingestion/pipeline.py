@@ -7,6 +7,7 @@ followed by the Redis query cache invalidation hook.
 """
 
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional
 
@@ -68,11 +69,15 @@ class IngestionPipeline:
         self._cache = cache
         self._settings = settings or get_settings()
 
-    def index_file(self, file_path: Path) -> IngestionResult:
+    def index_file(
+        self, file_path: Path, original_filename: Optional[str] = None
+    ) -> IngestionResult:
         """Executes the full end-to-end ingestion and indexing pipeline for a file.
 
         Args:
             file_path: Filesystem path of the file to ingest.
+            original_filename: Optional original sanitized filename (e.g. before staging).
+                When provided, overrides document source and file_name metadata.
 
         Returns:
             IngestionResult with metadata and indexing statistics.
@@ -83,31 +88,47 @@ class IngestionPipeline:
             EmbeddingError: If vector generation fails.
             VectorStoreError: If ChromaDB persistence fails.
         """
-        filename = file_path.name
-        file_type = file_path.suffix.lower()
+        canonical_filename = original_filename or file_path.name
+        file_type = Path(canonical_filename).suffix.lower()
         file_size_bytes = file_path.stat().st_size if file_path.exists() else 0
 
-        logger.info("Starting ingestion pipeline for file: '%s'", filename)
+        logger.info("Starting ingestion pipeline for file: '%s'", canonical_filename)
 
         # Step 1: Load and parse document
-        documents = self._document_service.ingest_file(file_path)
+        try:
+            documents = self._document_service.ingest_file(
+                file_path, original_filename=original_filename
+            )
+        except TypeError as err:
+            if "original_filename" in str(err) or "unexpected keyword argument" in str(err):
+                documents = self._document_service.ingest_file(file_path)
+            else:
+                raise
 
         # Step 2: Split into chunks
         chunks = self._chunker.chunk_documents(documents)
 
-        # Step 3: Generate dense embeddings
+        # Step 3: Inject indexed_at timestamp into every chunk's metadata
+        #         Use a single timestamp for the entire ingestion batch so all
+        #         chunks from one document share the same indexed_at value.
+        indexed_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        for chunk in chunks:
+            if hasattr(chunk, "metadata") and isinstance(chunk.metadata, dict):
+                chunk.metadata.setdefault("indexed_at", indexed_at)
+
+        # Step 4: Generate dense embeddings
         embedded_chunks = self._embedding_service.embed_documents(chunks)
 
-        # Step 4: Index into ChromaDB
+        # Step 5: Index into ChromaDB
         chunks_indexed = self._chroma_store.add_embedded_chunks(embedded_chunks)
 
         logger.info(
             "Successfully indexed '%s' into ChromaDB: chunks=%d",
-            filename,
+            canonical_filename,
             chunks_indexed,
         )
 
-        # Step 5: Invalidate Redis query cache (Correction #2)
+        # Step 6: Invalidate Redis query cache
         cache_cleared = False
         if self._cache is not None:
             try:
@@ -122,7 +143,7 @@ class IngestionPipeline:
                 )
 
         return IngestionResult(
-            filename=filename,
+            filename=canonical_filename,
             file_type=file_type,
             file_size_bytes=file_size_bytes,
             chunks_created=len(chunks),

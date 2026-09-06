@@ -479,3 +479,125 @@ def test_generate_chunk_id_deterministic() -> None:
 
     id4 = ChromaStore.generate_chunk_id("other.pdf", 3)
     assert id1 != id4
+
+
+# =====================================================================
+# Phase 14 / Bug Fix: list_sources and Physical Record Counting Tests
+# =====================================================================
+
+
+def test_list_sources_empty(chroma_store: ChromaStore) -> None:
+    """Verify list_sources() returns empty list when collection has no documents."""
+    assert chroma_store.list_sources() == []
+
+
+def test_list_sources_groups_chunks_and_counts_physical_records(
+    chroma_store: ChromaStore, sample_chunks, secondary_chunks
+) -> None:
+    """Verify chunks from the same document are aggregated into one summary with exact physical chunk count."""
+    chroma_store.add_embedded_chunks(sample_chunks)      # 3 chunks for architecture.pdf
+    chroma_store.add_embedded_chunks(secondary_chunks)   # 1 chunk for hr-policy.txt
+
+    docs = chroma_store.list_sources()
+    assert len(docs) == 2
+
+    # Map by source for assertions
+    by_source = {d["source"]: d for d in docs}
+    assert "architecture.pdf" in by_source
+    assert by_source["architecture.pdf"]["chunk_count"] == 3
+    assert by_source["architecture.pdf"]["file_type"] == ".pdf"
+
+    assert "hr-policy.txt" in by_source
+    assert by_source["hr-policy.txt"]["chunk_count"] == 1
+    assert by_source["hr-policy.txt"]["file_type"] == ".txt"
+
+
+def test_list_sources_physical_records_are_source_of_truth_not_metadata(
+    chroma_store: ChromaStore,
+) -> None:
+    """CRITICAL: If metadata says chunk_count=35, but only 1 physical record exists in Chroma,
+    list_sources() MUST report chunk_count=1, never fabricating missing records."""
+    incomplete_chunk = EmbeddedChunk(
+        content="Partial chunk from interrupted indexing.",
+        embedding=[0.05] * 768,
+        metadata={
+            "source": "partial_doc.pdf",
+            "file_type": "pdf",
+            "chunk_index": 0,
+            "chunk_count": 35,  # Incomplete: claims 35, but only 1 record exists!
+            "indexed_at": "2026-09-06T20:00:00Z",
+        },
+    )
+    chroma_store.add_embedded_chunks([incomplete_chunk])
+
+    docs = chroma_store.list_sources()
+    assert len(docs) == 1
+    assert docs[0]["source"] == "partial_doc.pdf"
+    assert docs[0]["chunk_count"] == 1  # Source of truth is 1 physical record!
+
+
+def test_list_sources_canonicalizes_legacy_uuid_prefix(
+    chroma_store: ChromaStore,
+) -> None:
+    """Verify legacy staging UUID prefixes (32 hex chars + _) are stripped in list_sources."""
+    legacy_chunk = EmbeddedChunk(
+        content="Roadmap content with legacy UUID source.",
+        embedding=[0.1] * 768,
+        metadata={
+            "source": "2cfa38edf3294abf9292b2bda6f77155_Genworx_Cracking_Roadmap.md",
+            "file_type": "md",
+            "chunk_index": 0,
+            "chunk_count": 35,
+            "indexed_at": "2026-09-06T20:08:17Z",
+        },
+    )
+    chroma_store.add_embedded_chunks([legacy_chunk])
+
+    docs = chroma_store.list_sources()
+    assert len(docs) == 1
+    assert docs[0]["source"] == "Genworx_Cracking_Roadmap.md"
+    assert docs[0]["file_type"] == ".md"
+    assert docs[0]["chunk_count"] == 1
+    assert docs[0]["indexed_at"] == "2026-09-06T20:08:17Z"
+
+
+def test_delete_by_source_deletes_legacy_uuid_prefix(
+    chroma_store: ChromaStore,
+) -> None:
+    """Verify delete_by_source using canonical name deletes legacy UUID-prefixed records."""
+    legacy_chunk = EmbeddedChunk(
+        content="Legacy document to be deleted.",
+        embedding=[0.2] * 768,
+        metadata={
+            "source": "2cfa38edf3294abf9292b2bda6f77155_Genworx_Cracking_Roadmap.md",
+            "file_type": "md",
+            "chunk_index": 0,
+        },
+    )
+    chroma_store.add_embedded_chunks([legacy_chunk])
+    assert chroma_store.count() == 1
+    assert chroma_store.count_by_source("Genworx_Cracking_Roadmap.md") == 1
+
+    # Delete using canonical name
+    deleted = chroma_store.delete_by_source("Genworx_Cracking_Roadmap.md")
+    assert deleted == 1
+    assert chroma_store.count() == 0
+    assert chroma_store.count_by_source("Genworx_Cracking_Roadmap.md") == 0
+
+
+def test_list_sources_handles_missing_or_empty_source(
+    chroma_store: ChromaStore,
+) -> None:
+    """Verify chunks with missing/empty source report as 'Unknown Document' rather than crashing."""
+    chunk = EmbeddedChunk(
+        content="Orphaned chunk with empty source.",
+        embedding=[0.3] * 768,
+        metadata={"file_type": "txt"},
+    )
+    chroma_store.add_embedded_chunks([chunk])
+
+    docs = chroma_store.list_sources()
+    assert len(docs) == 1
+    assert docs[0]["source"] == "Unknown Document"
+    assert docs[0]["chunk_count"] == 1
+

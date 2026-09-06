@@ -16,7 +16,7 @@ from app.chunking.chunker import DocumentChunker
 from app.core.config import Settings
 from app.embeddings.embedder import BaseEmbeddingService
 from app.ingestion.document_service import DocumentService
-from app.ingestion.loader import IngestionError
+from app.ingestion.loader import EmptyContentError, IngestionError
 from app.ingestion.pipeline import IngestionPipeline, IngestionResult
 from app.main import app
 from app.vectordb.chroma_store import ChromaStore
@@ -271,3 +271,118 @@ def test_20_cache_clear_failure_does_not_break_ingestion() -> None:
     # Must NOT raise exception; document indexing was successful
     assert result.chunks_created == 1
     assert result.cache_cleared is False
+
+
+# =====================================================================
+# Phase 13 — Resource Lifecycle & Edge Case Tests
+# =====================================================================
+
+
+def test_21_staged_file_cleaned_up_after_successful_ingestion(
+    client: TestClient, mock_ingestion_pipeline: MagicMock
+) -> None:
+    """21. Regression test: Staged file in data/uploads/ is deleted after successful indexing."""
+    captured_path: List[Path] = []
+
+    def spy_index_file(path: Path) -> IngestionResult:
+        captured_path.append(path)
+        # Verify the staged file exists during indexing
+        assert path.exists(), f"Staged file {path} should exist when index_file is called"
+        return IngestionResult(
+            filename=path.name,
+            file_type=path.suffix,
+            file_size_bytes=100,
+            chunks_created=1,
+            cache_cleared=True,
+        )
+
+    mock_ingestion_pipeline.index_file.side_effect = spy_index_file
+    app.dependency_overrides[get_ingestion_pipeline] = lambda: mock_ingestion_pipeline
+
+    files = {"file": ("cleanup_test.txt", b"Temporary file content to verify unlinking.", "text/plain")}
+    response = client.post("/api/v1/documents/upload", files=files)
+
+    assert response.status_code == 200
+    assert len(captured_path) == 1
+    # Verify the staged file was unlinked and does NOT linger on disk
+    assert not captured_path[0].exists(), f"Staged file {captured_path[0]} must be deleted after upload completes"
+
+
+def test_22_staged_file_cleaned_up_after_failed_ingestion(
+    client: TestClient, mock_ingestion_pipeline: MagicMock
+) -> None:
+    """22. Regression test: Staged file is cleaned up even if ingestion throws an exception."""
+    captured_path: List[Path] = []
+
+    def failing_index_file(path: Path) -> IngestionResult:
+        captured_path.append(path)
+        assert path.exists()
+        raise IngestionError("Simulated pipeline ingestion crash")
+
+    mock_ingestion_pipeline.index_file.side_effect = failing_index_file
+    app.dependency_overrides[get_ingestion_pipeline] = lambda: mock_ingestion_pipeline
+
+    files = {"file": ("failing_doc.txt", b"Content that triggers pipeline crash.", "text/plain")}
+    response = client.post("/api/v1/documents/upload", files=files)
+
+    assert response.status_code == 500
+    assert len(captured_path) == 1
+    # Verify staged file was unlinked in finally block despite exception
+    assert not captured_path[0].exists(), f"Staged file {captured_path[0]} must be deleted even after failure"
+
+
+def test_23_zero_extractable_text_returns_422(
+    client: TestClient, mock_ingestion_pipeline: MagicMock
+) -> None:
+    """23. Document with valid structure but zero extractable text returns 422 Unprocessable Entity."""
+    mock_ingestion_pipeline.index_file.side_effect = EmptyContentError(
+        "Document contains no extractable textual content (e.g. scanned image PDF)."
+    )
+    app.dependency_overrides[get_ingestion_pipeline] = lambda: mock_ingestion_pipeline
+
+    files = {"file": ("scanned_blank.pdf", b"%PDF-1.4 dummy pdf without text", "application/pdf")}
+    response = client.post("/api/v1/documents/upload", files=files)
+
+    assert response.status_code == 422
+    assert "no extractable textual content" in response.json()["detail"]
+
+
+def test_24_duplicate_filename_upload_creates_isolated_staging(
+    client: TestClient, mock_ingestion_pipeline: MagicMock
+) -> None:
+    """24. Consecutive uploads with the same filename stage to unique UUID paths without collision."""
+    captured_paths: List[Path] = []
+
+    def recording_index_file(path: Path) -> IngestionResult:
+        captured_paths.append(path)
+        return IngestionResult(
+            filename=path.name,
+            file_type=path.suffix,
+            file_size_bytes=50,
+            chunks_created=1,
+            cache_cleared=True,
+        )
+
+    mock_ingestion_pipeline.index_file.side_effect = recording_index_file
+    app.dependency_overrides[get_ingestion_pipeline] = lambda: mock_ingestion_pipeline
+
+    # Upload 1
+    res1 = client.post(
+        "/api/v1/documents/upload",
+        files={"file": ("handbook.txt", b"First version content.", "text/plain")},
+    )
+    assert res1.status_code == 200
+
+    # Upload 2 with identical filename
+    res2 = client.post(
+        "/api/v1/documents/upload",
+        files={"file": ("handbook.txt", b"Second version content.", "text/plain")},
+    )
+    assert res2.status_code == 200
+
+    assert len(captured_paths) == 2
+    # Ensure UUID prefix made paths unique
+    assert captured_paths[0] != captured_paths[1]
+    # Both paths should be cleanly removed
+    assert not captured_paths[0].exists()
+    assert not captured_paths[1].exists()

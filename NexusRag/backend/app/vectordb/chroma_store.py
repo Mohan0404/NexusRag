@@ -1,5 +1,6 @@
 import hashlib
 from pathlib import Path
+import re
 from typing import Any, Dict, List, Optional, Sequence
 
 from app.core.config import Settings, get_settings
@@ -348,32 +349,184 @@ class ChromaStore:
                 f"Failed to retrieve records by IDs: {e}"
             ) from e
 
+    @staticmethod
+    def _canonicalize_source(source: Optional[str]) -> str:
+        """Canonicalizes document source, stripping legacy 32-hex UUID staging prefixes.
+
+        Example:
+            '2cfa38edf3294abf9292b2bda6f77155_Genworx_Cracking_Roadmap.md'
+            -> 'Genworx_Cracking_Roadmap.md'
+        """
+        if not source or not str(source).strip():
+            return "Unknown Document"
+        clean = str(source).strip()
+        match = re.match(r"^[0-9a-fA-F]{32}_(.+)$", clean)
+        if match:
+            return match.group(1)
+        return clean
+
+    @staticmethod
+    def _normalize_file_type(file_type: Optional[str], canonical_source: str) -> str:
+        """Normalizes file extension to lowercase with leading dot (e.g. '.md')."""
+        if file_type and str(file_type).strip():
+            clean = str(file_type).strip().lower()
+            return f".{clean.lstrip('.')}"
+        suffix = Path(canonical_source).suffix.lower()
+        return suffix if suffix else ""
+
+    def get_chunk_ids_by_source(self, source: str) -> List[str]:
+        """Finds all chunk IDs belonging to a source (matching exact source or canonicalized source).
+
+        Args:
+            source: Source filename (canonical or legacy UUID-prefixed).
+
+        Returns:
+            List of matching chunk IDs.
+        """
+        collection = self._ensure_collection()
+        target_canonical = self._canonicalize_source(source)
+
+        try:
+            # First try exact query via where clause
+            exact = collection.get(where={"source": source}, include=[])
+            direct_ids = exact.get("ids", []) or []
+            if direct_ids:
+                return direct_ids
+
+            # If no direct match, check all records for legacy UUID-prefixed sources matching target_canonical
+            all_records = collection.get(include=["metadatas"])
+            metadatas = all_records.get("metadatas", []) or []
+            ids = all_records.get("ids", []) or []
+
+            matching_ids: List[str] = []
+            for chunk_id, meta in zip(ids, metadatas):
+                if not meta:
+                    continue
+                raw_source = meta.get("source", "")
+                if raw_source == source or self._canonicalize_source(raw_source) == target_canonical:
+                    matching_ids.append(chunk_id)
+
+            return matching_ids
+        except Exception as e:
+            raise VectorStoreError(
+                f"Failed to find chunk IDs for source '{source}': {e}"
+            ) from e
+
     def get_by_source(
         self,
         source: str,
         include: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
-        """Retrieves all chunks originating from a specific source file.
+        """Retrieves all chunks originating from a specific source file (canonical or legacy).
 
         Args:
-            source: Source filename (e.g. 'report.pdf').
+            source: Source filename (canonical or legacy UUID-prefixed).
             include: Optional list of fields to include.
 
         Returns:
-            ChromaDB GetResult dictionary filtered by source metadata.
+            ChromaDB GetResult dictionary.
         """
         collection = self._ensure_collection()
         include = include or ["documents", "metadatas"]
 
         try:
-            return collection.get(
-                where={"source": source},
-                include=include,
-            )
+            exact = collection.get(where={"source": source}, include=include)
+            if exact.get("ids"):
+                return exact
+
+            chunk_ids = self.get_chunk_ids_by_source(source)
+            if chunk_ids:
+                return collection.get(ids=chunk_ids, include=include)
+
+            return {"ids": [], "documents": [], "metadatas": []}
         except Exception as e:
             raise VectorStoreError(
                 f"Failed to retrieve records for source '{source}': {e}"
             ) from e
+
+    def count_by_source(self, source: str) -> int:
+        """Returns the number of actual Chroma records stored for a specific source document.
+
+        Args:
+            source: Source filename (canonical or legacy).
+
+        Returns:
+            Integer count of actual stored records for that source. 0 if not found.
+        """
+        try:
+            return len(self.get_chunk_ids_by_source(source))
+        except VectorStoreError:
+            return 0
+
+    def list_sources(self) -> List[Dict[str, Any]]:
+        """Lists all distinct source documents currently indexed in the collection.
+
+        Performs a metadata-only scan of the collection and aggregates per-document
+        summaries. The physical number of Chroma records is the single source of truth
+        for chunk_count.
+
+        Returns:
+            List of dictionaries, each representing a distinct document:
+                - source (str): Canonical filename (legacy UUID prefix stripped).
+                - file_type (str): Normalized file extension (e.g. '.pdf', '.md').
+                - chunk_count (int): Actual number of physical Chroma records.
+                - indexed_at (str | None): ISO-8601 timestamp of earliest chunk, or
+                  None for documents indexed before this field was introduced.
+
+        Raises:
+            VectorStoreError: If the ChromaDB metadata scan fails.
+        """
+        collection = self._ensure_collection()
+
+        try:
+            result = collection.get(include=["metadatas"])
+        except Exception as e:
+            raise VectorStoreError(
+                f"Failed to retrieve collection metadata for source listing: {e}"
+            ) from e
+
+        metadatas: List[Dict[str, Any]] = result.get("metadatas", []) or []
+
+        # Aggregate per-source statistics based on actual physical records
+        source_map: Dict[str, Dict[str, Any]] = {}
+        for meta in metadatas:
+            if not meta:
+                continue
+            raw_source = meta.get("source")
+            canonical_source = self._canonicalize_source(raw_source)
+
+            if canonical_source not in source_map:
+                normalized_type = self._normalize_file_type(
+                    meta.get("file_type"), canonical_source
+                )
+                source_map[canonical_source] = {
+                    "source": canonical_source,
+                    "file_type": normalized_type,
+                    "chunk_count": 0,
+                    "indexed_at": meta.get("indexed_at"),
+                }
+
+            # Physical records are the single source of truth for chunk_count
+            source_map[canonical_source]["chunk_count"] += 1
+
+            # Keep the earliest indexed_at seen for this source
+            current_ts = source_map[canonical_source]["indexed_at"]
+            chunk_ts = meta.get("indexed_at")
+            if chunk_ts and (not current_ts or chunk_ts < current_ts):
+                source_map[canonical_source]["indexed_at"] = chunk_ts
+
+        documents = sorted(
+            source_map.values(),
+            key=lambda d: (d["indexed_at"] or "", d["source"]),
+            reverse=True,
+        )
+
+        logger.debug(
+            "list_sources: found %d distinct document(s) in collection '%s'",
+            len(documents),
+            self._collection_name,
+        )
+        return documents
 
     # =================================================================
     # Similarity Search (Phase 7)
@@ -457,25 +610,39 @@ class ChromaStore:
                 f"Failed to delete records by IDs: {e}"
             ) from e
 
-    def delete_by_source(self, source: str) -> None:
-        """Deletes all chunks from a specific source document.
+    def delete_by_source(
+        self, source: str, exclude_ids: Optional[List[str]] = None
+    ) -> int:
+        """Deletes all chunks belonging to a document (canonical or legacy).
 
         Args:
-            source: Source filename (e.g. 'report.pdf').
-        """
-        collection = self._ensure_collection()
+            source: Source filename (canonical or legacy UUID-prefixed).
+            exclude_ids: Optional list of chunk IDs to preserve.
 
-        try:
-            collection.delete(where={"source": source})
-            logger.info(
-                "Deleted all chunks for source '%s' from collection '%s'",
-                source,
-                self._collection_name,
-            )
-        except Exception as e:
-            raise VectorStoreError(
-                f"Failed to delete records for source '{source}': {e}"
-            ) from e
+        Returns:
+            Integer count of actual records deleted.
+        """
+        matching_ids = self.get_chunk_ids_by_source(source)
+        if exclude_ids:
+            matching_ids = [cid for cid in matching_ids if cid not in exclude_ids]
+
+        if not matching_ids:
+            # Fallback to direct collection delete where source=source if no metadata scan found IDs
+            try:
+                collection = self._ensure_collection()
+                collection.delete(where={"source": source})
+            except Exception:
+                pass
+            return 0
+
+        self.delete_by_ids(matching_ids)
+        logger.info(
+            "Deleted %d chunk(s) for source '%s' from collection '%s'",
+            len(matching_ids),
+            source,
+            self._collection_name,
+        )
+        return len(matching_ids)
 
     # =================================================================
     # Collection Information

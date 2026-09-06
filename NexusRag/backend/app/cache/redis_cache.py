@@ -283,6 +283,11 @@ class BaseQueryCache(ABC):
         """Returns snapshot dictionary of in-memory cache metrics."""
         pass
 
+    @abstractmethod
+    def clear(self) -> bool:
+        """Clears all cached query responses."""
+        pass
+
 
 # =====================================================================
 # Redis Query Cache Implementation

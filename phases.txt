@@ -1,0 +1,22 @@
+docs/
+│
+├── architecture.md
+├── api-design.md
+├── decisions.md
+│
+└── phases/
+    ├── phase-01-fastapi-foundation.md
+    ├── phase-02-configuration-logging.md
+    ├── phase-03-document-ingestion.md
+    ├── phase-04-chunking.md
+    ├── phase-05-embeddings.md
+    ├── phase-06-chromadb-vector-index.md
+    ├── phase-07-similarity-retrieval.md
+    ├── phase-08-llm-integration.md
+    ├── phase-09-rag-pipeline.md
+    ├── phase-10-redis-caching.md
+    ├── phase-11-fastapi-apis.md
+    ├── phase-12-react-frontend.md
+    ├── phase-13-testing.md
+    ├── phase-14-rag-evaluation.md
+    └── phase-15-docker-production.md

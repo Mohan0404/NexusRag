@@ -68,3 +68,34 @@ class HealthResponse(BaseModel):
     """Liveness probe response model."""
 
     status: str = Field(default="healthy", description="Application liveness status")
+
+
+class DocumentSummary(BaseModel):
+    """Summary metadata for a single indexed document."""
+
+    source: str = Field(..., description="Original filename used as the source identifier in ChromaDB")
+    file_type: str = Field(default="", description="File extension (e.g. '.pdf')")
+    chunk_count: int = Field(default=0, description="Number of indexed chunks for this document")
+    indexed_at: Any = Field(default=None, description="ISO-8601 UTC timestamp of indexing, or null for legacy documents")
+
+
+class DocumentListResponse(BaseModel):
+    """List of all indexed documents with summary statistics."""
+
+    documents: List[DocumentSummary] = Field(
+        default_factory=list,
+        description="Ordered list of distinct indexed documents (newest first)",
+    )
+    total_chunks: int = Field(
+        default=0,
+        description="Total number of chunks across all indexed documents",
+    )
+
+
+class DocumentDeleteResponse(BaseModel):
+    """Result of a successful document deletion from the knowledge base."""
+
+    source: str = Field(..., description="Filename of the deleted document")
+    chunks_deleted: int = Field(..., description="Number of vector chunks removed from ChromaDB")
+    status: str = Field(default="deleted", description="Deletion status string ('deleted')")
+

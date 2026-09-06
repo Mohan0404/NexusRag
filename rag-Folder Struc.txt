@@ -1,0 +1,129 @@
+Nexusrag/
+│
+├── README.md
+├── .gitignore
+├── .env.example
+├── docker-compose.yml
+│
+├── backend/
+│   ├── requirements.txt
+│   ├── .env
+│   ├── config.yaml
+│   ├── Dockerfile
+│   │
+│   ├── data/
+│   │   ├── documents/
+│   │   └── chroma/
+│   │
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── main.py
+│   │   │
+│   │   ├── ingestion/
+│   │   │   ├── __init__.py
+│   │   │   ├── loader.py
+│   │   │   └── document_service.py
+│   │   │
+│   │   ├── chunking/
+│   │   │   ├── __init__.py
+│   │   │   └── chunker.py
+│   │   │
+│   │   ├── embeddings/
+│   │   │   ├── __init__.py
+│   │   │   └── embedder.py
+│   │   │
+│   │   ├── vectordb/
+│   │   │   ├── __init__.py
+│   │   │   └── chroma_store.py
+│   │   │
+│   │   ├── retrieval/
+│   │   │   ├── __init__.py
+│   │   │   └── retriever.py
+│   │   │
+│   │   ├── prompts/
+│   │   │   ├── __init__.py
+│   │   │   └── templates.py
+│   │   │
+│   │   ├── llm/
+│   │   │   ├── __init__.py
+│   │   │   ├── gemini.py
+│   │   │   ├── openrouter.py
+│   │   │   └── llm_service.py
+│   │   │
+│   │   ├── cache/
+│   │   │   ├── __init__.py
+│   │   │   └── redis_cache.py
+│   │   │
+│   │   ├── rag/
+│   │   │   ├── __init__.py
+│   │   │   └── pipeline.py
+│   │   │
+│   │   ├── api/
+│   │   │   ├── __init__.py
+│   │   │   ├── routes_chat.py
+│   │   │   ├── routes_documents.py
+│   │   │   └── routes_health.py
+│   │   │
+│   │   ├── models/
+│   │   │   ├── __init__.py
+│   │   │   ├── requests.py
+│   │   │   └── responses.py
+│   │   │
+│   │   ├── core/
+│   │   │   ├── __init__.py
+│   │   │   ├── config.py
+│   │   │   └── logging.py
+│   │   │
+│   │   └── utils/
+│   │       ├── __init__.py
+│   │       └── helpers.py
+│   │
+│   ├── tests/
+│   │   ├── __init__.py
+│   │   ├── test_chat.py
+│   │   ├── test_ingestion.py
+│   │   ├── test_retrieval.py
+│   │   └── test_cache.py
+│   │
+│   └── logs/
+│       └── app.log
+│
+├── frontend/
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── index.html
+│   │
+│   ├── public/
+│   │
+│   └── src/
+│       ├── main.jsx
+│       ├── App.jsx
+│       │
+│       ├── components/
+│       │   ├── ChatWindow.jsx
+│       │   ├── ChatMessage.jsx
+│       │   ├── ChatInput.jsx
+│       │   ├── SourceCard.jsx
+│       │   ├── DocumentUploader.jsx
+│       │   └── LoadingIndicator.jsx
+│       │
+│       ├── pages/
+│       │   ├── ChatPage.jsx
+│       │   └── DocumentsPage.jsx
+│       │
+│       ├── services/
+│       │   └── api.js
+│       │
+│       ├── hooks/
+│       │   └── useChat.js
+│       │
+│       ├── utils/
+│       │   └── helpers.js
+│       │
+│       └── styles/
+│           └── index.css
+│
+└── evaluation/
+    ├── dataset.json
+    ├── evaluate_retrieval.py
+    └── evaluate_answers.py
