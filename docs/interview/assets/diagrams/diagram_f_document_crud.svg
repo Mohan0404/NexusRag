@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 340" width="100%" height="340">
+  <defs>
+    <filter id="fShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#0F172A" flood-opacity="0.06" />
+    </filter>
+  </defs>
+
+  <rect width="800" height="340" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" />
+
+  <!-- Quadrant 1: CREATE (Upload) -->
+  <g transform="translate(25, 20)" filter="url(#fShadow)">
+    <rect width="360" height="135" rx="8" fill="#FFFFFF" stroke="#4F46E5" stroke-width="1.5" />
+    <rect x="12" y="12" width="75" height="20" rx="4" fill="#EEF2FF" />
+    <text x="49" y="26" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="800" fill="#4F46E5" text-anchor="middle">CREATE</text>
+    <text x="95" y="26" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#0F172A">Upload Document</text>
+    <text x="345" y="26" font-family="'JetBrains Mono', monospace" font-size="8" fill="#64748B" text-anchor="end">POST /upload</text>
+    <line x1="12" y1="38" x2="348" y2="38" stroke="#F1F5F9" stroke-width="1" />
+    <text x="14" y="54" font-family="'Inter', sans-serif" font-size="8" fill="#475569">1. Stage file to ./data/uploads/{uuid}_{filename}</text>
+    <text x="14" y="68" font-family="'Inter', sans-serif" font-size="8" fill="#475569">2. Load &amp; Clean text (PyPDFLoader / TextLoader)</text>
+    <text x="14" y="82" font-family="'Inter', sans-serif" font-size="8" fill="#475569">3. Split recursively into 800-char chunks (overlap 100)</text>
+    <text x="14" y="96" font-family="'Inter', sans-serif" font-size="8" fill="#475569">4. Embed batch with Gemini Embedding 2 (768d)</text>
+    <text x="14" y="110" font-family="'Inter', sans-serif" font-size="8" fill="#475569">5. Upsert to ChromaDB &amp; invalidate Redis query cache</text>
+    <text x="14" y="124" font-family="'Inter', sans-serif" font-size="7.5" font-weight="700" fill="#065F46">✓ Staged file unlinked in finally block</text>
+  </g>
+
+  <!-- Quadrant 2: READ (List) -->
+  <g transform="translate(415, 20)" filter="url(#fShadow)">
+    <rect width="360" height="135" rx="8" fill="#FFFFFF" stroke="#10B981" stroke-width="1.5" />
+    <rect x="12" y="12" width="60" height="20" rx="4" fill="#ECFDF5" />
+    <text x="42" y="26" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="800" fill="#065F46" text-anchor="middle">READ</text>
+    <text x="80" y="26" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#0F172A">List Knowledge Base</text>
+    <text x="345" y="26" font-family="'JetBrains Mono', monospace" font-size="8" fill="#64748B" text-anchor="end">GET /documents</text>
+    <line x1="12" y1="38" x2="348" y2="38" stroke="#F1F5F9" stroke-width="1" />
+    <text x="14" y="54" font-family="'Inter', sans-serif" font-size="8" fill="#475569">1. Query ChromaDB collection metadata</text>
+    <text x="14" y="68" font-family="'Inter', sans-serif" font-size="8" fill="#475569">2. Extract unique source filenames (strip legacy UUIDs)</text>
+    <text x="14" y="82" font-family="'Inter', sans-serif" font-size="8" fill="#475569">3. Count physical vectors per document (source of truth)</text>
+    <text x="14" y="96" font-family="'Inter', sans-serif" font-size="8" fill="#475569">4. Extract earliest indexed_at ISO timestamp</text>
+    <text x="14" y="110" font-family="'Inter', sans-serif" font-size="8" fill="#475569">5. Return DocumentSummary list with chunk counts</text>
+    <text x="14" y="124" font-family="'Inter', sans-serif" font-size="7.5" font-weight="700" fill="#065F46">✓ Physical records prevent metadata drift</text>
+  </g>
+
+  <!-- Quadrant 3: UPDATE (Safe Replace) -->
+  <g transform="translate(25, 175)" filter="url(#fShadow)">
+    <rect width="360" height="145" rx="8" fill="#FFFFFF" stroke="#F59E0B" stroke-width="1.5" />
+    <rect x="12" y="12" width="75" height="20" rx="4" fill="#FFFBEB" />
+    <text x="49" y="26" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="800" fill="#92400E" text-anchor="middle">UPDATE</text>
+    <text x="95" y="26" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#0F172A">Safe Replacement</text>
+    <text x="345" y="26" font-family="'JetBrains Mono', monospace" font-size="8" fill="#64748B" text-anchor="end">PUT /documents/{name}</text>
+    <line x1="12" y1="38" x2="348" y2="38" stroke="#F1F5F9" stroke-width="1" />
+    <text x="14" y="54" font-family="'Inter', sans-serif" font-size="8" fill="#475569">1. Verify target document currently exists in ChromaDB</text>
+    <text x="14" y="68" font-family="'Inter', sans-serif" font-size="8" fill="#475569">2. Stage new file to isolated temporary path</text>
+    <text x="14" y="82" font-family="'Inter', sans-serif" font-size="8" fill="#475569">3. Ingest, chunk, and embed new file FIRST</text>
+    <text x="14" y="96" font-family="'Inter', sans-serif" font-size="8" fill="#475569">4. On success: delete old document's vectors</text>
+    <text x="14" y="110" font-family="'Inter', sans-serif" font-size="8" fill="#475569">5. Invalidate entire Redis query cache</text>
+    <rect x="14" y="118" width="332" height="18" rx="3" fill="#FFFBEB" />
+    <text x="18" y="130" font-family="'Inter', sans-serif" font-size="7" font-weight="700" fill="#92400E">CRITICAL: If embedding fails, old document is kept untouched</text>
+  </g>
+
+  <!-- Quadrant 4: DELETE (Purge) -->
+  <g transform="translate(415, 175)" filter="url(#fShadow)">
+    <rect width="360" height="145" rx="8" fill="#FFFFFF" stroke="#EF4444" stroke-width="1.5" />
+    <rect x="12" y="12" width="75" height="20" rx="4" fill="#FEF2F2" />
+    <text x="49" y="26" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="800" fill="#991B1B" text-anchor="middle">DELETE</text>
+    <text x="95" y="26" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#0F172A">Purge Vectors</text>
+    <text x="345" y="26" font-family="'JetBrains Mono', monospace" font-size="8" fill="#64748B" text-anchor="end">DELETE /documents/{name}</text>
+    <line x1="12" y1="38" x2="348" y2="38" stroke="#F1F5F9" stroke-width="1" />
+    <text x="14" y="54" font-family="'Inter', sans-serif" font-size="8" fill="#475569">1. Verify document exists; return 404 if absent</text>
+    <text x="14" y="68" font-family="'Inter', sans-serif" font-size="8" fill="#475569">2. Query ChromaDB for all chunk IDs matching source</text>
+    <text x="14" y="82" font-family="'Inter', sans-serif" font-size="8" fill="#475569">3. Execute collection.delete(ids=[...])</text>
+    <text x="14" y="96" font-family="'Inter', sans-serif" font-size="8" fill="#475569">4. Clear Redis query cache to purge stale answers</text>
+    <text x="14" y="110" font-family="'Inter', sans-serif" font-size="8" fill="#475569">5. Return 200 OK with deleted chunk count</text>
+    <rect x="14" y="118" width="332" height="18" rx="3" fill="#FEF2F2" />
+    <text x="18" y="130" font-family="'Inter', sans-serif" font-size="7" font-weight="700" fill="#991B1B">Stops RAG from citing deleted enterprise documents</text>
+  </g>
+</svg>

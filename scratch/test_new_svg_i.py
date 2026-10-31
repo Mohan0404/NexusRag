@@ -1,0 +1,182 @@
+"""
+Test script to generate and visually validate the new SVG_DIAGRAM_I.
+"""
+import os
+from playwright.sync_api import sync_playwright
+
+SVG_DIAGRAM_I_REFINED = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 350" width="100%" height="350">
+  <defs>
+    <filter id="iShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#0F172A" flood-opacity="0.08" />
+    </filter>
+    <marker id="arrowRedI" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#EF4444" />
+    </marker>
+    <marker id="arrowIndigoI" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#4F46E5" />
+    </marker>
+    <marker id="arrowGreenI" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#10B981" />
+    </marker>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="860" height="350" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" />
+
+  <!-- Title Header -->
+  <g transform="translate(20, 15)">
+    <rect x="0" y="0" width="150" height="18" rx="9" fill="#EEF2FF" stroke="#C7D2FE" />
+    <text x="75" y="12.5" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="800" fill="#4F46E5">PARADIGM COMPARISON</text>
+    <text x="162" y="13" font-family="'Inter', sans-serif" font-size="11.5" font-weight="800" fill="#0F172A">NAIVE FOUNDATION LLM vs. NEXUSRAG GROUNDED ARCHITECTURE</text>
+    <text x="162" y="25" font-family="'Inter', sans-serif" font-size="8" fill="#64748B">Comparing direct parameter recall failure modes against deterministic vector retrieval with source attribution</text>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- LEFT PANEL: NAIVE FOUNDATION LLM           -->
+  <!-- ========================================== -->
+  <g transform="translate(20, 48)">
+    <rect width="395" height="288" rx="8" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1.5" />
+    <rect x="14" y="12" width="175" height="20" rx="4" fill="#FEF3C7" stroke="#F59E0B" />
+    <text x="22" y="25.5" font-family="'Inter', sans-serif" font-size="8.5" font-weight="800" fill="#92400E">NAIVE FOUNDATION LLM</text>
+    <text x="380" y="25" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="700" fill="#DC2626">Unsafe Baseline</text>
+
+    <!-- Flow: Question -> Standard LLM -> Unverified Answer -->
+    <!-- Step 1: Question -->
+    <g transform="translate(14, 42)" filter="url(#iShadow)">
+      <rect width="105" height="46" rx="6" fill="#FFFFFF" stroke="#CBD5E1" />
+      <text x="8" y="16" font-family="'Inter', sans-serif" font-size="7.5" font-weight="700" fill="#0F172A">User Question</text>
+      <text x="8" y="28" font-family="'Inter', sans-serif" font-size="7" fill="#64748B">"What is our policy?"</text>
+      <text x="8" y="39" font-family="'JetBrains Mono', monospace" font-size="6.5" font-weight="600" fill="#94A3B8">Input String</text>
+    </g>
+
+    <!-- Arrow 1 -> 2 -->
+    <path d="M 120 65 L 140 65" fill="none" stroke="#EF4444" stroke-width="1.5" marker-end="url(#arrowRedI)" />
+
+    <!-- Step 2: Standard LLM -->
+    <g transform="translate(143, 42)" filter="url(#iShadow)">
+      <rect width="112" height="46" rx="6" fill="#FFFFFF" stroke="#EF4444" stroke-width="1.5" />
+      <text x="8" y="16" font-family="'Inter', sans-serif" font-size="7.5" font-weight="700" fill="#991B1B">Standard LLM</text>
+      <text x="8" y="28" font-family="'Inter', sans-serif" font-size="7" fill="#64748B">Pre-trained weights</text>
+      <text x="8" y="39" font-family="'JetBrains Mono', monospace" font-size="6.5" font-weight="600" fill="#DC2626">No External Context</text>
+    </g>
+
+    <!-- Arrow 2 -> 3 -->
+    <path d="M 256 65 L 276 65" fill="none" stroke="#EF4444" stroke-width="1.5" marker-end="url(#arrowRedI)" />
+
+    <!-- Step 3: Fabricated Output -->
+    <g transform="translate(279, 42)" filter="url(#iShadow)">
+      <rect width="102" height="46" rx="6" fill="#FEF2F2" stroke="#F87171" stroke-dasharray="3,2" />
+      <text x="8" y="16" font-family="'Inter', sans-serif" font-size="7.5" font-weight="700" fill="#B91C1C">Unverified Text</text>
+      <text x="8" y="28" font-family="'Inter', sans-serif" font-size="7" fill="#64748B">Plausible fabrication</text>
+      <text x="8" y="39" font-family="'JetBrains Mono', monospace" font-size="6.5" font-weight="700" fill="#DC2626">Zero Citations</text>
+    </g>
+
+    <!-- Down arrow to Risk Box -->
+    <path d="M 199 88 L 199 100" fill="none" stroke="#EF4444" stroke-width="1.5" marker-end="url(#arrowRedI)" />
+
+    <!-- Critical Risks Box -->
+    <g transform="translate(14, 102)">
+      <rect width="367" height="172" rx="6" fill="#FFFFFF" stroke="#FECACA" />
+      <text x="12" y="18" font-family="'Inter', sans-serif" font-size="8" font-weight="800" fill="#991B1B">CRITICAL SYSTEM DEFECTS &amp; RISKS:</text>
+
+      <g transform="translate(12, 28)">
+        <text x="0" y="10" font-family="'Inter', sans-serif" font-size="7.5"><tspan font-weight="700" fill="#DC2626">✖ Hallucination: </tspan><tspan fill="#475569">Fabricates plausible but false facts with high confidence</tspan></text>
+        <text x="0" y="26" font-family="'Inter', sans-serif" font-size="7.5"><tspan font-weight="700" fill="#DC2626">✖ Knowledge Cutoff: </tspan><tspan fill="#475569">Blind to internal updates, recent guidelines, &amp; new files</tspan></text>
+        <text x="0" y="42" font-family="'Inter', sans-serif" font-size="7.5"><tspan font-weight="700" fill="#DC2626">✖ Private Data Blindness: </tspan><tspan fill="#475569">Zero access to enterprise PDFs, internal reports, or docs</tspan></text>
+        <text x="0" y="58" font-family="'Inter', sans-serif" font-size="7.5"><tspan font-weight="700" fill="#DC2626">✖ Zero Attribution: </tspan><tspan fill="#475569">Provides no document name, page number, or audit trail</tspan></text>
+        <text x="0" y="74" font-family="'Inter', sans-serif" font-size="7.5"><tspan font-weight="700" fill="#DC2626">✖ Silent Fallback Failure: </tspan><tspan fill="#475569">Guesses instead of refusing when context is absent</tspan></text>
+        <text x="0" y="90" font-family="'Inter', sans-serif" font-size="7.5"><tspan font-weight="700" fill="#DC2626">✖ High API Cost: </tspan><tspan fill="#475569">Repeats identical full LLM calls with zero caching layer</tspan></text>
+      </g>
+
+      <!-- Verdict Banner -->
+      <rect x="10" y="138" width="347" height="22" rx="4" fill="#FEE2E2" stroke="#FCA5A5" />
+      <text x="183.5" y="152.5" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="800" fill="#991B1B">CRITICAL DEFECT: UNSAFE FOR ENTERPRISE DECISION MAKING</text>
+    </g>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- RIGHT PANEL: NEXUSRAG GROUNDED SYSTEM      -->
+  <!-- ========================================== -->
+  <g transform="translate(425, 48)">
+    <rect width="415" height="288" rx="8" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1.5" />
+    <rect x="14" y="12" width="190" height="20" rx="4" fill="#DCFCE7" stroke="#10B981" />
+    <text x="22" y="25.5" font-family="'Inter', sans-serif" font-size="8.5" font-weight="800" fill="#166534">NEXUSRAG GROUNDED SYSTEM</text>
+    <text x="400" y="25" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="700" fill="#059669">Verified Production</text>
+
+    <!-- 4 Clear Step Boxes: Question -> Retrieval -> Grounding -> LLM + Citations -->
+    <!-- Step 1: Query Input -->
+    <g transform="translate(14, 42)" filter="url(#iShadow)">
+      <rect width="82" height="46" rx="6" fill="#FFFFFF" stroke="#3B82F6" />
+      <text x="6" y="15" font-family="'Inter', sans-serif" font-size="7.5" font-weight="700" fill="#1D4ED8">1. Query</text>
+      <text x="6" y="27" font-family="'Inter', sans-serif" font-size="6.8" fill="#64748B">ChatInput.jsx</text>
+      <text x="6" y="38" font-family="'JetBrains Mono', monospace" font-size="6" font-weight="600" fill="#2563EB">Redis Check</text>
+    </g>
+
+    <!-- Arrow 1 -> 2 -->
+    <path d="M 97 65 L 109 65" fill="none" stroke="#4F46E5" stroke-width="1.5" marker-end="url(#arrowIndigoI)" />
+
+    <!-- Step 2: Dense Retrieval -->
+    <g transform="translate(111, 42)" filter="url(#iShadow)">
+      <rect width="96" height="46" rx="6" fill="#FFFFFF" stroke="#4F46E5" stroke-width="1.5" />
+      <text x="6" y="15" font-family="'Inter', sans-serif" font-size="7.5" font-weight="700" fill="#4338CA">2. Retrieval</text>
+      <text x="6" y="27" font-family="'Inter', sans-serif" font-size="6.8" fill="#64748B">ChromaDB Top-4</text>
+      <text x="6" y="38" font-family="'JetBrains Mono', monospace" font-size="6" font-weight="600" fill="#4F46E5">768d Vector L2</text>
+    </g>
+
+    <!-- Arrow 2 -> 3 -->
+    <path d="M 208 65 L 220 65" fill="none" stroke="#4F46E5" stroke-width="1.5" marker-end="url(#arrowIndigoI)" />
+
+    <!-- Step 3: Context Guard & Prompt -->
+    <g transform="translate(222, 42)" filter="url(#iShadow)">
+      <rect width="88" height="46" rx="6" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.5" />
+      <text x="6" y="15" font-family="'Inter', sans-serif" font-size="7.5" font-weight="700" fill="#6D28D9">3. Grounding</text>
+      <text x="6" y="27" font-family="'Inter', sans-serif" font-size="6.8" fill="#64748B">Strict QA Prompt</text>
+      <text x="6" y="38" font-family="'JetBrains Mono', monospace" font-size="6" font-weight="600" fill="#7C3AED">Context Guard</text>
+    </g>
+
+    <!-- Arrow 3 -> 4 -->
+    <path d="M 311 65 L 323 65" fill="none" stroke="#10B981" stroke-width="1.5" marker-end="url(#arrowGreenI)" />
+
+    <!-- Step 4: Grounded LLM + Citations -->
+    <g transform="translate(325, 42)" filter="url(#iShadow)">
+      <rect width="76" height="46" rx="6" fill="#FFFFFF" stroke="#10B981" stroke-width="1.5" />
+      <text x="6" y="15" font-family="'Inter', sans-serif" font-size="7.5" font-weight="700" fill="#047857">4. Response</text>
+      <text x="6" y="27" font-family="'Inter', sans-serif" font-size="6.8" fill="#64748B">Gemini 2.5 Flash</text>
+      <text x="6" y="38" font-family="'JetBrains Mono', monospace" font-size="6" font-weight="700" fill="#059669">+ Citations</text>
+    </g>
+
+    <!-- Down arrow to Advantages Box -->
+    <path d="M 266 88 L 266 100" fill="none" stroke="#10B981" stroke-width="1.5" marker-end="url(#arrowGreenI)" />
+
+    <!-- Engineering Advantages Box -->
+    <g transform="translate(14, 102)">
+      <rect width="387" height="172" rx="6" fill="#FFFFFF" stroke="#A7F3D0" />
+      <text x="12" y="18" font-family="'Inter', sans-serif" font-size="8" font-weight="800" fill="#065F46">NEXUSRAG PRODUCTION ADVANTAGES:</text>
+
+      <g transform="translate(12, 28)">
+        <text x="0" y="10" font-family="'Inter', sans-serif" font-size="7.5"><tspan font-weight="700" fill="#059669">✔ Strict Grounded Context: </tspan><tspan fill="#475569">LLM reasons purely over retrieved Top-4 passages</tspan></text>
+        <text x="0" y="26" font-family="'Inter', sans-serif" font-size="7.5"><tspan font-weight="700" fill="#059669">✔ Real-Time Freshness: </tspan><tspan fill="#475569">New PDFs indexed in seconds (800/100) without re-training</tspan></text>
+        <text x="0" y="42" font-family="'Inter', sans-serif" font-size="7.5"><tspan font-weight="700" fill="#059669">✔ Full Source Attribution: </tspan><tspan fill="#475569">Exact (filename, page) citation pills clickable in UI</tspan></text>
+        <text x="0" y="58" font-family="'Inter', sans-serif" font-size="7.5"><tspan font-weight="700" fill="#059669">✔ Refusal on Absent Info: </tspan><tspan fill="#475569">Context Guard returns deterministic fallback refusal</tspan></text>
+        <text x="0" y="74" font-family="'Inter', sans-serif" font-size="7.5"><tspan font-weight="700" fill="#059669">✔ Sub-5ms Query Cache: </tspan><tspan fill="#475569">Redis short-circuits repeated queries (1-hour TTL)</tspan></text>
+        <text x="0" y="90" font-family="'Inter', sans-serif" font-size="7.5"><tspan font-weight="700" fill="#059669">✔ Deterministic Testing: </tspan><tspan fill="#475569">236 automated tests verify pipeline &amp; schema contracts</tspan></text>
+      </g>
+
+      <!-- Verdict Banner -->
+      <rect x="10" y="138" width="367" height="22" rx="4" fill="#DCFCE7" stroke="#86EFAC" />
+      <text x="193.5" y="152.5" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="800" fill="#166534">VERDICT: ENTERPRISE-GRADE FACTUAL INTEGRITY &amp; AUDIT TRAIL</text>
+    </g>
+  </g>
+</svg>"""
+
+with open(r"D:\Academic-Projects\RAG\scratch\test_diagram_i.svg", "w", encoding="utf-8") as f:
+    f.write(SVG_DIAGRAM_I_REFINED)
+
+with sync_playwright() as p:
+    browser = p.chromium.launch()
+    page = browser.new_page(viewport={'width': 920, 'height': 420})
+    page.goto('file:///D:/Academic-Projects/RAG/scratch/test_diagram_i.svg')
+    page.screenshot(path=r'D:\Academic-Projects\RAG\scratch\test_diagram_i.png')
+    browser.close()
+
+print("Rendered test_diagram_i.png successfully.")

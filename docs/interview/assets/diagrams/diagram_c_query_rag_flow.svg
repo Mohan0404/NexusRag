@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" width="100%" height="380">
+  <defs>
+    <filter id="qShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#0F172A" flood-opacity="0.06" />
+    </filter>
+    <marker id="arrowC" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#4F46E5" />
+    </marker>
+    <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#10B981" />
+    </marker>
+  </defs>
+
+  <rect width="800" height="380" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" />
+
+  <!-- Query Start Box -->
+  <g transform="translate(30, 140)" filter="url(#qShadow)">
+    <rect width="130" height="80" rx="6" fill="#FFFFFF" stroke="#4F46E5" stroke-width="1.5" />
+    <text x="12" y="24" font-family="'Inter', sans-serif" font-size="10" font-weight="700" fill="#0F172A">User Question</text>
+    <text x="12" y="40" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#64748B">POST /api/v1/chat</text>
+    <rect x="10" y="48" width="110" height="22" rx="4" fill="#EEF2FF" />
+    <text x="16" y="62" font-family="'Inter', sans-serif" font-size="7.5" font-weight="600" fill="#4F46E5">Normalized Input</text>
+  </g>
+
+  <!-- Arrow to Redis Check -->
+  <path d="M 160 180 L 195 180" fill="none" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrowC)" />
+
+  <!-- Decision Diamond: Redis Cache -->
+  <g transform="translate(200, 140)" filter="url(#qShadow)">
+    <polygon points="55,0 110,40 55,80 0,40" fill="#FFFFFF" stroke="#10B981" stroke-width="1.5" />
+    <text x="55" y="38" font-family="'Inter', sans-serif" font-size="9" font-weight="700" fill="#065F46" text-anchor="middle">Cache</text>
+    <text x="55" y="50" font-family="'Inter', sans-serif" font-size="9" font-weight="700" fill="#065F46" text-anchor="middle">HIT?</text>
+  </g>
+
+  <!-- Branch 1: Cache HIT (Upwards) -->
+  <path d="M 255 140 L 255 70 L 640 70" fill="none" stroke="#10B981" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrowGreen)" />
+  <text x="270" y="62" font-family="'JetBrains Mono', monospace" font-size="8" font-weight="700" fill="#10B981">YES: CACHE HIT (&lt; 10ms)</text>
+
+  <!-- Branch 2: Cache MISS (Rightwards) -->
+  <path d="M 310 180 L 340 180" fill="none" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrowC)" />
+  <text x="315" y="172" font-family="'JetBrains Mono', monospace" font-size="8" font-weight="700" fill="#EF4444">NO</text>
+
+  <!-- Vector Retrieval Steps -->
+  <!-- Step 1: Query Embed -->
+  <g transform="translate(345, 140)" filter="url(#qShadow)">
+    <rect width="125" height="80" rx="6" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.5" />
+    <text x="10" y="20" font-family="'Inter', sans-serif" font-size="9.5" font-weight="700" fill="#7C3AED">1. Embed Query</text>
+    <text x="10" y="34" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#64748B">Gemini Embed 2</text>
+    <rect x="8" y="44" width="109" height="24" rx="4" fill="#F5F3FF" />
+    <text x="12" y="58" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="600" fill="#7C3AED">768d Vector</text>
+  </g>
+
+  <!-- Arrow -->
+  <path d="M 470 180 L 495 180" fill="none" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrowC)" />
+
+  <!-- Step 2: ChromaDB Similarity -->
+  <g transform="translate(500, 140)" filter="url(#qShadow)">
+    <rect width="130" height="80" rx="6" fill="#FFFFFF" stroke="#4F46E5" stroke-width="1.5" />
+    <text x="10" y="20" font-family="'Inter', sans-serif" font-size="9.5" font-weight="700" fill="#4F46E5">2. Vector Search</text>
+    <text x="10" y="34" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#64748B">ChromaStore (L2)</text>
+    <rect x="8" y="44" width="114" height="24" rx="4" fill="#EEF2FF" />
+    <text x="12" y="58" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="600" fill="#4F46E5">Top-K = 4 Chunks</text>
+  </g>
+
+  <!-- Arrow Down to Generation -->
+  <path d="M 565 220 L 565 260" fill="none" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrowC)" />
+
+  <!-- Bottom Row: Prompt & LLM -->
+  <!-- Step 3: Prompt Grounding -->
+  <g transform="translate(480, 265)" filter="url(#qShadow)">
+    <rect width="170" height="85" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5" />
+    <text x="10" y="20" font-family="'Inter', sans-serif" font-size="9.5" font-weight="700" fill="#0F172A">3. Prompt Grounding</text>
+    <text x="10" y="34" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">• Injects 4 context chunks</text>
+    <text x="10" y="48" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">• "Answer ONLY from context"</text>
+    <text x="10" y="62" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">• "Say 'I don't know' if absent"</text>
+    <text x="10" y="74" font-family="'Inter', sans-serif" font-size="7.5" fill="#64748B">templates.py</text>
+  </g>
+
+  <!-- Arrow to LLM -->
+  <path d="M 480 307 L 440 307" fill="none" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrowC)" />
+
+  <!-- Step 4: OpenRouter LLM -->
+  <g transform="translate(270, 265)" filter="url(#qShadow)">
+    <rect width="165" height="85" rx="6" fill="#FFFFFF" stroke="#F59E0B" stroke-width="1.5" />
+    <text x="10" y="20" font-family="'Inter', sans-serif" font-size="9.5" font-weight="700" fill="#92400E">4. LLM Generation</text>
+    <text x="10" y="34" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#64748B">OpenRouter Gateway</text>
+    <text x="10" y="48" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">google/gemini-2.5-flash</text>
+    <rect x="8" y="56" width="149" height="20" rx="4" fill="#FFFBEB" />
+    <text x="12" y="70" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="600" fill="#92400E">Temp 0.2 · Max 4096</text>
+  </g>
+
+  <!-- Arrow to Cache SET -->
+  <path d="M 270 307 L 220 307" fill="none" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrowC)" />
+
+  <!-- Step 5: Cache SET -->
+  <g transform="translate(80, 265)" filter="url(#qShadow)">
+    <rect width="135" height="85" rx="6" fill="#FFFFFF" stroke="#10B981" stroke-width="1.5" />
+    <text x="10" y="20" font-family="'Inter', sans-serif" font-size="9.5" font-weight="700" fill="#065F46">5. Cache SET</text>
+    <text x="10" y="34" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#64748B">Redis SET with TTL</text>
+    <text x="10" y="48" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">TTL = 3600 seconds</text>
+    <rect x="8" y="56" width="119" height="20" rx="4" fill="#ECFDF5" />
+    <text x="12" y="70" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="600" fill="#065F46">JSON Serialized</text>
+  </g>
+
+  <!-- Final RAG Response Box (Top Right) -->
+  <g transform="translate(645, 45)" filter="url(#qShadow)">
+    <rect width="130" height="75" rx="6" fill="#FFFFFF" stroke="#4F46E5" stroke-width="2" />
+    <text x="10" y="20" font-family="'Inter', sans-serif" font-size="10" font-weight="800" fill="#4F46E5">RAGResponse</text>
+    <text x="10" y="36" font-family="'Inter', sans-serif" font-size="8" fill="#0F172A">• Grounded Answer</text>
+    <text x="10" y="48" font-family="'Inter', sans-serif" font-size="8" fill="#0F172A">• Deduplicated Sources</text>
+    <text x="10" y="60" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#10B981">• Page Citations</text>
+  </g>
+
+  <!-- Connect Cache SET to Response -->
+  <path d="M 147 265 L 147 240 L 710 240 L 710 125" fill="none" stroke="#4F46E5" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arrowC)" />
+</svg>

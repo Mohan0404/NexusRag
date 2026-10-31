@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 340" width="100%" height="340">
+  <defs>
+    <filter id="gShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#0F172A" flood-opacity="0.06" />
+    </filter>
+    <marker id="arrowG" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#4F46E5" />
+    </marker>
+    <marker id="arrowRedG" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#EF4444" />
+    </marker>
+    <marker id="arrowGreenG" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#10B981" />
+    </marker>
+  </defs>
+
+  <rect width="760" height="340" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" />
+
+  <!-- Step 1: Check Target -->
+  <g transform="translate(25, 40)" filter="url(#gShadow)">
+    <rect width="140" height="75" rx="6" fill="#FFFFFF" stroke="#4F46E5" stroke-width="1.5" />
+    <text x="10" y="20" font-family="'Inter', sans-serif" font-size="10" font-weight="700" fill="#0F172A">1. Verify Target</text>
+    <text x="10" y="34" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">Check old document</text>
+    <text x="10" y="46" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">exists in ChromaDB</text>
+    <text x="10" y="60" font-family="'JetBrains Mono', monospace" font-size="7" fill="#EF4444">404 if absent</text>
+  </g>
+
+  <!-- Arrow -->
+  <path d="M 165 77 L 195 77" fill="none" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrowG)" />
+
+  <!-- Step 2: Stage New File -->
+  <g transform="translate(200, 40)" filter="url(#gShadow)">
+    <rect width="140" height="75" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5" />
+    <text x="10" y="20" font-family="'Inter', sans-serif" font-size="10" font-weight="700" fill="#0F172A">2. Stage New File</text>
+    <text x="10" y="34" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">Save to isolated path</text>
+    <text x="10" y="46" font-family="'JetBrains Mono', monospace" font-size="7" fill="#64748B">{uuid}_{filename}</text>
+    <text x="10" y="60" font-family="'Inter', sans-serif" font-size="7.5" fill="#10B981">Zero collision</text>
+  </g>
+
+  <!-- Arrow -->
+  <path d="M 340 77 L 370 77" fill="none" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrowG)" />
+
+  <!-- Step 3: Index New File -->
+  <g transform="translate(375, 40)" filter="url(#gShadow)">
+    <rect width="145" height="75" rx="6" fill="#FFFFFF" stroke="#4F46E5" stroke-width="1.5" />
+    <text x="10" y="20" font-family="'Inter', sans-serif" font-size="10" font-weight="700" fill="#0F172A">3. Ingest &amp; Embed</text>
+    <text x="10" y="34" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">Load, split, embed</text>
+    <text x="10" y="46" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">and upsert new vectors</text>
+    <text x="10" y="60" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="600" fill="#4F46E5">Done BEFORE delete</text>
+  </g>
+
+  <!-- Arrow -->
+  <path d="M 520 77 L 550 77" fill="none" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrowG)" />
+
+  <!-- Decision Diamond: Success? -->
+  <g transform="translate(555, 37)" filter="url(#gShadow)">
+    <polygon points="55,0 110,40 55,80 0,40" fill="#FFFFFF" stroke="#F59E0B" stroke-width="1.5" />
+    <text x="55" y="36" font-family="'Inter', sans-serif" font-size="9" font-weight="800" fill="#92400E" text-anchor="middle">Ingestion</text>
+    <text x="55" y="48" font-family="'Inter', sans-serif" font-size="9" font-weight="800" fill="#92400E" text-anchor="middle">Succeeded?</text>
+  </g>
+
+  <!-- NO Path: Failure / Rollback -->
+  <path d="M 610 117 L 610 170" fill="none" stroke="#EF4444" stroke-width="2" marker-end="url(#arrowRedG)" />
+  <text x="618" y="145" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="800" fill="#EF4444">NO</text>
+
+  <!-- Failure Box -->
+  <g transform="translate(480, 180)" filter="url(#gShadow)">
+    <rect width="250" height="125" rx="8" fill="#FEF2F2" stroke="#EF4444" stroke-width="1.5" />
+    <text x="14" y="24" font-family="'Inter', sans-serif" font-size="10.5" font-weight="800" fill="#991B1B">FAILURE: OLD DOCUMENT PRESERVED</text>
+    <text x="14" y="42" font-family="'Inter', sans-serif" font-size="8" fill="#475569">• Embedding provider timed out or returned 429</text>
+    <text x="14" y="56" font-family="'Inter', sans-serif" font-size="8" fill="#475569">• Staged file unlinked in finally block</text>
+    <text x="14" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#475569">• Old vectors in ChromaDB NEVER deleted</text>
+    <text x="14" y="84" font-family="'Inter', sans-serif" font-size="8" fill="#475569">• Returns HTTP 500/502 to user</text>
+    <rect x="12" y="94" width="226" height="20" rx="4" fill="#FFFFFF" stroke="#FECACA" />
+    <text x="18" y="108" font-family="'Inter', sans-serif" font-size="7.5" font-weight="700" fill="#991B1B">ZERO DATA LOSS · ZERO DOWNTIME</text>
+  </g>
+
+  <!-- YES Path: Success (Leftwards down) -->
+  <path d="M 665 77 L 700 77 L 700 140 L 320 140 L 320 170" fill="none" stroke="#10B981" stroke-width="2" marker-end="url(#arrowGreenG)" />
+  <text x="705" y="110" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="800" fill="#10B981">YES</text>
+
+  <!-- Success Box -->
+  <g transform="translate(60, 180)" filter="url(#gShadow)">
+    <rect width="380" height="125" rx="8" fill="#ECFDF5" stroke="#10B981" stroke-width="1.5" />
+    <text x="14" y="24" font-family="'Inter', sans-serif" font-size="10.5" font-weight="800" fill="#065F46">SUCCESS: PURGE OLD &amp; INVALIDATE CACHE</text>
+    <text x="14" y="44" font-family="'Inter', sans-serif" font-size="8" fill="#475569">1. Delete all old vectors matching source filename from ChromaDB</text>
+    <text x="14" y="58" font-family="'Inter', sans-serif" font-size="8" fill="#475569">2. Invalidate entire Redis query cache (purge stale query answers)</text>
+    <text x="14" y="72" font-family="'Inter', sans-serif" font-size="8" fill="#475569">3. Unlink staged file from disk</text>
+    <text x="14" y="86" font-family="'Inter', sans-serif" font-size="8" fill="#475569">4. Return HTTP 200 with new chunk count and timestamp</text>
+    <rect x="12" y="96" width="356" height="20" rx="4" fill="#FFFFFF" stroke="#A7F3D0" />
+    <text x="18" y="110" font-family="'Inter', sans-serif" font-size="7.5" font-weight="700" fill="#065F46">ATOMIC-LIKE REPLACEMENT GUARANTEE IN CHROMADB</text>
+  </g>
+</svg>
