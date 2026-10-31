@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" width="100%" height="360">
+  <defs>
+    <filter id="boxShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#0F172A" flood-opacity="0.06" />
+    </filter>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#4F46E5" />
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="360" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" />
+
+  <!-- Top Flow Row 1 (Steps 1 to 4) -->
+  <!-- Step 1: Upload -->
+  <g transform="translate(30, 30)" filter="url(#boxShadow)">
+    <rect width="160" height="110" rx="8" fill="#FFFFFF" stroke="#4F46E5" stroke-width="1.5" />
+    <circle cx="24" cy="24" r="12" fill="#EEF2FF" />
+    <text x="24" y="28" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="800" fill="#4F46E5" text-anchor="middle">1</text>
+    <text x="44" y="28" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#0F172A">Upload Action</text>
+    <line x1="12" y1="44" x2="148" y2="44" stroke="#F1F5F9" stroke-width="1" />
+    <text x="12" y="60" font-family="'Inter', sans-serif" font-size="8.5" fill="#475569">POST /api/v1/upload</text>
+    <text x="12" y="74" font-family="'Inter', sans-serif" font-size="8" fill="#64748B">PDF, TXT, or Markdown</text>
+    <rect x="12" y="82" width="136" height="18" rx="4" fill="#EEF2FF" />
+    <text x="18" y="94" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="600" fill="#4F46E5">Limit: 10 MB Max</text>
+  </g>
+
+  <!-- Arrow 1 -> 2 -->
+  <path d="M 190 85 L 220 85" fill="none" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- Step 2: Validation & Staging -->
+  <g transform="translate(225, 30)" filter="url(#boxShadow)">
+    <rect width="160" height="110" rx="8" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5" />
+    <circle cx="24" cy="24" r="12" fill="#F1F5F9" />
+    <text x="24" y="28" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="800" fill="#475569" text-anchor="middle">2</text>
+    <text x="44" y="28" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#0F172A">Validate &amp; Stage</text>
+    <line x1="12" y1="44" x2="148" y2="44" stroke="#F1F5F9" stroke-width="1" />
+    <text x="12" y="60" font-family="'Inter', sans-serif" font-size="8.5" fill="#475569">Extension Whitelist</text>
+    <text x="12" y="74" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#64748B">./data/uploads/{uuid}</text>
+    <rect x="12" y="82" width="136" height="18" rx="4" fill="#FEF2F2" />
+    <text x="18" y="94" font-family="'Inter', sans-serif" font-size="7" font-weight="700" fill="#991B1B">Unlinked on Failure</text>
+  </g>
+
+  <!-- Arrow 2 -> 3 -->
+  <path d="M 385 85 L 415 85" fill="none" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- Step 3: Document Loader -->
+  <g transform="translate(420, 30)" filter="url(#boxShadow)">
+    <rect width="160" height="110" rx="8" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5" />
+    <circle cx="24" cy="24" r="12" fill="#F1F5F9" />
+    <text x="24" y="28" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="800" fill="#475569" text-anchor="middle">3</text>
+    <text x="44" y="28" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#0F172A">Format Loader</text>
+    <line x1="12" y1="44" x2="148" y2="44" stroke="#F1F5F9" stroke-width="1" />
+    <text x="12" y="58" font-family="'Inter', sans-serif" font-size="8" fill="#475569">• PDF: PyPDFLoader</text>
+    <text x="12" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#475569">• TXT/MD: TextLoader</text>
+    <rect x="12" y="82" width="136" height="18" rx="4" fill="#F5F3FF" />
+    <text x="18" y="94" font-family="'Inter', sans-serif" font-size="7.5" font-weight="600" fill="#7C3AED">Page metadata tagged</text>
+  </g>
+
+  <!-- Arrow 3 -> 4 -->
+  <path d="M 580 85 L 610 85" fill="none" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- Step 4: Text Cleaning -->
+  <g transform="translate(615, 30)" filter="url(#boxShadow)">
+    <rect width="155" height="110" rx="8" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5" />
+    <circle cx="24" cy="24" r="12" fill="#F1F5F9" />
+    <text x="24" y="28" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="800" fill="#475569" text-anchor="middle">4</text>
+    <text x="44" y="28" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#0F172A">Text Sanitization</text>
+    <line x1="12" y1="44" x2="143" y2="44" stroke="#F1F5F9" stroke-width="1" />
+    <text x="12" y="58" font-family="'Inter', sans-serif" font-size="8" fill="#475569">• Strip leading/trailing</text>
+    <text x="12" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#475569">• Collapse whitespace</text>
+    <rect x="12" y="82" width="131" height="18" rx="4" fill="#FFFBEB" />
+    <text x="16" y="94" font-family="'Inter', sans-serif" font-size="7" font-weight="700" fill="#92400E">Reject empty text</text>
+  </g>
+
+  <!-- Arrow 4 Down to 5 -->
+  <path d="M 692 140 L 692 185 L 692 205" fill="none" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- Bottom Flow Row 2 (Steps 5 to 8) -->
+  <!-- Step 5: Recursive Chunking -->
+  <g transform="translate(615, 215)" filter="url(#boxShadow)">
+    <rect width="155" height="115" rx="8" fill="#FFFFFF" stroke="#4F46E5" stroke-width="1.5" />
+    <circle cx="24" cy="24" r="12" fill="#EEF2FF" />
+    <text x="24" y="28" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="800" fill="#4F46E5" text-anchor="middle">5</text>
+    <text x="44" y="28" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#0F172A">Chunking Splitter</text>
+    <line x1="12" y1="44" x2="143" y2="44" stroke="#F1F5F9" stroke-width="1" />
+    <text x="12" y="58" font-family="'JetBrains Mono', monospace" font-size="8" fill="#4F46E5">chunk_size = 800</text>
+    <text x="12" y="72" font-family="'JetBrains Mono', monospace" font-size="8" fill="#4F46E5">chunk_overlap = 100</text>
+    <rect x="12" y="82" width="131" height="24" rx="4" fill="#EEF2FF" />
+    <text x="16" y="94" font-family="'Inter', sans-serif" font-size="7" font-weight="600" fill="#4F46E5">Separators: ["\n\n",</text>
+    <text x="16" y="103" font-family="'Inter', sans-serif" font-size="7" font-weight="600" fill="#4F46E5">"\n", " ", ""]</text>
+  </g>
+
+  <!-- Arrow 5 <- 6 -->
+  <path d="M 615 272 L 585 272" fill="none" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- Step 6: Metadata Injection -->
+  <g transform="translate(420, 215)" filter="url(#boxShadow)">
+    <rect width="160" height="115" rx="8" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5" />
+    <circle cx="24" cy="24" r="12" fill="#F1F5F9" />
+    <text x="24" y="28" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="800" fill="#475569" text-anchor="middle">6</text>
+    <text x="44" y="28" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#0F172A">Metadata Inject</text>
+    <line x1="12" y1="44" x2="148" y2="44" stroke="#F1F5F9" stroke-width="1" />
+    <text x="12" y="58" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#475569">• source: filename</text>
+    <text x="12" y="70" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#475569">• page: int (1-based)</text>
+    <text x="12" y="82" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#475569">• chunk_index: int</text>
+    <text x="12" y="94" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#475569">• indexed_at: ISO8601</text>
+  </g>
+
+  <!-- Arrow 6 <- 7 -->
+  <path d="M 420 272 L 390 272" fill="none" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- Step 7: Batch Embedding -->
+  <g transform="translate(225, 215)" filter="url(#boxShadow)">
+    <rect width="160" height="115" rx="8" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.5" />
+    <circle cx="24" cy="24" r="12" fill="#F5F3FF" />
+    <text x="24" y="28" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="800" fill="#7C3AED" text-anchor="middle">7</text>
+    <text x="44" y="28" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#7C3AED">Gemini Embed</text>
+    <line x1="12" y1="44" x2="148" y2="44" stroke="#F1F5F9" stroke-width="1" />
+    <text x="12" y="58" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#64748B">gemini-embedding-2</text>
+    <text x="12" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#475569">Batch Size: 100 chunks</text>
+    <rect x="12" y="82" width="136" height="22" rx="4" fill="#F5F3FF" />
+    <text x="16" y="96" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="700" fill="#7C3AED">768 Dim Dense Vector</text>
+  </g>
+
+  <!-- Arrow 7 <- 8 -->
+  <path d="M 225 272 L 195 272" fill="none" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- Step 8: ChromaDB Store & Cache Invalidate -->
+  <g transform="translate(30, 215)" filter="url(#boxShadow)">
+    <rect width="160" height="115" rx="8" fill="#FFFFFF" stroke="#10B981" stroke-width="1.5" />
+    <circle cx="24" cy="24" r="12" fill="#ECFDF5" />
+    <text x="24" y="28" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="800" fill="#065F46" text-anchor="middle">8</text>
+    <text x="44" y="28" font-family="'Inter', sans-serif" font-size="11" font-weight="700" fill="#065F46">Index &amp; Purge</text>
+    <line x1="12" y1="44" x2="148" y2="44" stroke="#F1F5F9" stroke-width="1" />
+    <text x="12" y="58" font-family="'Inter', sans-serif" font-size="8" fill="#475569">• ChromaStore.upsert()</text>
+    <text x="12" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#475569">• redis_cache.clear()</text>
+    <rect x="12" y="82" width="136" height="22" rx="4" fill="#ECFDF5" />
+    <text x="16" y="96" font-family="'Inter', sans-serif" font-size="7.5" font-weight="700" fill="#065F46">Knowledge Active</text>
+  </g>
+</svg>

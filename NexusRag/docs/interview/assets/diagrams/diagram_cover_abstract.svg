@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 280" width="100%" height="280">
+  <defs>
+    <linearGradient id="covBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="50%" stop-color="#1E1B4B" />
+      <stop offset="100%" stop-color="#0F172A" />
+    </linearGradient>
+    <linearGradient id="covNodeGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818CF8" />
+      <stop offset="100%" stop-color="#C084FC" />
+    </linearGradient>
+    <linearGradient id="covLineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4F46E5" stop-opacity="0.3" />
+      <stop offset="50%" stop-color="#818CF8" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#C084FC" stop-opacity="0.3" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <rect width="800" height="280" rx="14" fill="url(#covBg)" />
+  
+  <!-- Subtle Grid -->
+  <g opacity="0.08" stroke="#FFFFFF" stroke-width="1">
+    <line x1="0" y1="70" x2="800" y2="70" />
+    <line x1="0" y1="140" x2="800" y2="140" />
+    <line x1="0" y1="210" x2="800" y2="210" />
+    <line x1="160" y1="0" x2="160" y2="280" />
+    <line x1="320" y1="0" x2="320" y2="280" />
+    <line x1="480" y1="0" x2="480" y2="280" />
+    <line x1="640" y1="0" x2="640" y2="280" />
+  </g>
+
+  <!-- Constellation Network Edges -->
+  <g stroke="url(#covLineGrad)" stroke-width="1.5" stroke-dasharray="4,4">
+    <line x1="100" y1="140" x2="220" y2="80" />
+    <line x1="100" y1="140" x2="220" y2="200" />
+    <line x1="220" y1="80" x2="360" y2="140" />
+    <line x1="220" y1="200" x2="360" y2="140" />
+    <line x1="360" y1="140" x2="480" y2="80" />
+    <line x1="360" y1="140" x2="480" y2="200" />
+    <line x1="480" y1="80" x2="620" y2="140" />
+    <line x1="480" y1="200" x2="620" y2="140" />
+    <line x1="620" y1="140" x2="720" y2="140" />
+    <line x1="220" y1="80" x2="480" y2="80" opacity="0.4" />
+    <line x1="220" y1="200" x2="480" y2="200" opacity="0.4" />
+  </g>
+
+  <!-- Vector Field Waves -->
+  <path d="M 50 140 Q 200 40 350 140 T 650 140 T 750 140" fill="none" stroke="#6366F1" stroke-width="2" opacity="0.4" />
+  <path d="M 50 140 Q 200 240 350 140 T 650 140 T 750 140" fill="none" stroke="#A855F7" stroke-width="2" opacity="0.3" />
+
+  <!-- Nodes with Glowing Centers -->
+  <!-- Node 1: Raw Knowledge -->
+  <g transform="translate(100, 140)">
+    <circle r="22" fill="#1E293B" stroke="#818CF8" stroke-width="2" filter="url(#glow)" />
+    <circle r="10" fill="#4F46E5" />
+    <text y="38" fill="#E2E8F0" font-family="'Inter', sans-serif" font-size="10" font-weight="700" text-anchor="middle">INGESTION</text>
+    <text y="50" fill="#94A3B8" font-family="'JetBrains Mono', monospace" font-size="8" text-anchor="middle">PDF/TXT/MD</text>
+  </g>
+
+  <!-- Node 2: Chunks -->
+  <g transform="translate(220, 80)">
+    <circle r="18" fill="#1E293B" stroke="#6366F1" stroke-width="2" />
+    <circle r="7" fill="#6366F1" />
+    <text y="32" fill="#E2E8F0" font-family="'Inter', sans-serif" font-size="9" font-weight="600" text-anchor="middle">CHUNKING</text>
+    <text y="42" fill="#94A3B8" font-family="'JetBrains Mono', monospace" font-size="7.5" text-anchor="middle">800 / 100 char</text>
+  </g>
+
+  <!-- Node 3: Cache -->
+  <g transform="translate(220, 200)">
+    <circle r="18" fill="#1E293B" stroke="#10B981" stroke-width="2" />
+    <circle r="7" fill="#10B981" />
+    <text y="32" fill="#E2E8F0" font-family="'Inter', sans-serif" font-size="9" font-weight="600" text-anchor="middle">REDIS CACHE</text>
+    <text y="42" fill="#94A3B8" font-family="'JetBrains Mono', monospace" font-size="7.5" text-anchor="middle">TTL 3600s</text>
+  </g>
+
+  <!-- Node 4: Dense Vectors (Core Hub) -->
+  <g transform="translate(360, 140)">
+    <circle r="30" fill="#1E1B4B" stroke="url(#covNodeGlow)" stroke-width="3" filter="url(#glow)" />
+    <circle r="14" fill="#818CF8" />
+    <text y="46" fill="#F8FAFC" font-family="'Inter', sans-serif" font-size="11" font-weight="800" text-anchor="middle">DENSE VECTORS</text>
+    <text y="58" fill="#C7D2FE" font-family="'JetBrains Mono', monospace" font-size="8" text-anchor="middle">768-DIM CHROMADB</text>
+  </g>
+
+  <!-- Node 5: Similarity Search -->
+  <g transform="translate(480, 80)">
+    <circle r="18" fill="#1E293B" stroke="#A855F7" stroke-width="2" />
+    <circle r="7" fill="#A855F7" />
+    <text y="32" fill="#E2E8F0" font-family="'Inter', sans-serif" font-size="9" font-weight="600" text-anchor="middle">RETRIEVAL</text>
+    <text y="42" fill="#94A3B8" font-family="'JetBrains Mono', monospace" font-size="7.5" text-anchor="middle">Top-K = 4 L2</text>
+  </g>
+
+  <!-- Node 6: Grounding Prompt -->
+  <g transform="translate(480, 200)">
+    <circle r="18" fill="#1E293B" stroke="#EC4899" stroke-width="2" />
+    <circle r="7" fill="#EC4899" />
+    <text y="32" fill="#E2E8F0" font-family="'Inter', sans-serif" font-size="9" font-weight="600" text-anchor="middle">PROMPT</text>
+    <text y="42" fill="#94A3B8" font-family="'JetBrains Mono', monospace" font-size="7.5" text-anchor="middle">Anti-Hallucination</text>
+  </g>
+
+  <!-- Node 7: Reasoning Engine (LLM) -->
+  <g transform="translate(620, 140)">
+    <circle r="24" fill="#1E293B" stroke="#F59E0B" stroke-width="2.5" filter="url(#glow)" />
+    <circle r="11" fill="#F59E0B" />
+    <text y="40" fill="#E2E8F0" font-family="'Inter', sans-serif" font-size="10" font-weight="700" text-anchor="middle">GEMINI 2.5</text>
+    <text y="52" fill="#FCD34D" font-family="'JetBrains Mono', monospace" font-size="8" text-anchor="middle">via OpenRouter</text>
+  </g>
+
+  <!-- Node 8: Grounded Output -->
+  <g transform="translate(730, 140)">
+    <circle r="16" fill="#1E293B" stroke="#10B981" stroke-width="2" />
+    <circle r="7" fill="#10B981" />
+    <text y="30" fill="#E2E8F0" font-family="'Inter', sans-serif" font-size="9" font-weight="700" text-anchor="middle">CITATIONS</text>
+    <text y="40" fill="#6EE7B7" font-family="'JetBrains Mono', monospace" font-size="7.5" text-anchor="middle">Page-Level</text>
+  </g>
+</svg>

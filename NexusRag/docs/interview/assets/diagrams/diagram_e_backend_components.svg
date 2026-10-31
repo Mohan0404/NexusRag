@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" width="100%" height="380">
+  <defs>
+    <filter id="eShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#0F172A" flood-opacity="0.06" />
+    </filter>
+    <marker id="arrowE" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#4F46E5" />
+    </marker>
+  </defs>
+
+  <rect width="800" height="380" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" />
+
+  <!-- App Entrypoint -->
+  <g transform="translate(30, 150)" filter="url(#eShadow)">
+    <rect width="110" height="70" rx="6" fill="#FFFFFF" stroke="#4F46E5" stroke-width="2" />
+    <text x="10" y="24" font-family="'Inter', sans-serif" font-size="11" font-weight="800" fill="#4F46E5">FastAPI App</text>
+    <text x="10" y="42" font-family="'JetBrains Mono', monospace" font-size="8" fill="#64748B">main.py</text>
+    <text x="10" y="56" font-family="'Inter', sans-serif" font-size="7.5" fill="#94A3B8">Lifespan context</text>
+  </g>
+
+  <!-- Arrow to Dependencies -->
+  <path d="M 140 185 L 175 185" fill="none" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrowE)" />
+
+  <!-- Dependencies Container -->
+  <g transform="translate(180, 40)" filter="url(#eShadow)">
+    <rect width="170" height="300" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="3,3" />
+    <text x="14" y="26" font-family="'Inter', sans-serif" font-size="10" font-weight="800" fill="#0F172A">dependencies.py</text>
+    <text x="14" y="40" font-family="'Inter', sans-serif" font-size="7.5" fill="#64748B">Singleton Provider (@lru_cache)</text>
+    <line x1="10" y1="48" x2="160" y2="48" stroke="#E2E8F0" stroke-width="1" />
+
+    <rect x="10" y="55" width="150" height="26" rx="4" fill="#FFFFFF" stroke="#E2E8F0" />
+    <text x="16" y="72" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#4F46E5">get_settings()</text>
+
+    <rect x="10" y="88" width="150" height="26" rx="4" fill="#FFFFFF" stroke="#E2E8F0" />
+    <text x="16" y="105" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#4F46E5">get_redis_cache()</text>
+
+    <rect x="10" y="121" width="150" height="26" rx="4" fill="#FFFFFF" stroke="#E2E8F0" />
+    <text x="16" y="138" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#4F46E5">get_embedding_service()</text>
+
+    <rect x="10" y="154" width="150" height="26" rx="4" fill="#FFFFFF" stroke="#E2E8F0" />
+    <text x="16" y="171" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#4F46E5">get_chroma_store()</text>
+
+    <rect x="10" y="187" width="150" height="26" rx="4" fill="#FFFFFF" stroke="#E2E8F0" />
+    <text x="16" y="204" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#4F46E5">get_retriever()</text>
+
+    <rect x="10" y="220" width="150" height="26" rx="4" fill="#FFFFFF" stroke="#E2E8F0" />
+    <text x="16" y="237" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#4F46E5">get_llm_service()</text>
+
+    <rect x="10" y="253" width="150" height="32" rx="4" fill="#EEF2FF" stroke="#4F46E5" />
+    <text x="16" y="268" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="700" fill="#4F46E5">get_rag_pipeline()</text>
+    <text x="16" y="279" font-family="'JetBrains Mono', monospace" font-size="7" fill="#4F46E5">get_document_service()</text>
+  </g>
+
+  <!-- Arrow to Domain Layer -->
+  <path d="M 350 185 L 385 185" fill="none" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrowE)" />
+
+  <!-- Domain Services Layer -->
+  <g transform="translate(390, 50)" filter="url(#eShadow)">
+    <rect width="180" height="120" rx="6" fill="#FFFFFF" stroke="#4F46E5" stroke-width="1.5" />
+    <text x="12" y="22" font-family="'Inter', sans-serif" font-size="10.5" font-weight="800" fill="#4F46E5">RAGPipeline</text>
+    <text x="12" y="36" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#64748B">rag/pipeline.py</text>
+    <line x1="12" y1="44" x2="168" y2="44" stroke="#F1F5F9" stroke-width="1" />
+    <text x="12" y="58" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">• query(text)</text>
+    <text x="12" y="70" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">• Injects Retriever</text>
+    <text x="12" y="82" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">• Injects LLMService</text>
+    <text x="12" y="94" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">• Injects RedisQueryCache</text>
+    <text x="12" y="106" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">• Deduplicates Citations</text>
+  </g>
+
+  <g transform="translate(390, 195)" filter="url(#eShadow)">
+    <rect width="180" height="125" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5" />
+    <text x="12" y="22" font-family="'Inter', sans-serif" font-size="10.5" font-weight="800" fill="#0F172A">DocumentService</text>
+    <text x="12" y="36" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#64748B">ingestion/pipeline.py</text>
+    <line x1="12" y1="44" x2="168" y2="44" stroke="#F1F5F9" stroke-width="1" />
+    <text x="12" y="58" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">• ingest_file(path)</text>
+    <text x="12" y="70" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">• replace_document(target)</text>
+    <text x="12" y="82" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">• delete_document(source)</text>
+    <text x="12" y="94" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">• list_documents()</text>
+    <text x="12" y="106" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">• Clears Redis on Mutation</text>
+  </g>
+
+  <!-- Arrow to Storage Abstractions -->
+  <path d="M 570 110 L 605 110" fill="none" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrowE)" />
+  <path d="M 570 255 L 605 255" fill="none" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrowE)" />
+
+  <!-- Storage Abstractions Layer -->
+  <g transform="translate(610, 40)" filter="url(#eShadow)">
+    <rect width="165" height="70" rx="6" fill="#FFFFFF" stroke="#10B981" stroke-width="1.5" />
+    <text x="10" y="20" font-family="'Inter', sans-serif" font-size="9.5" font-weight="700" fill="#065F46">RedisQueryCache</text>
+    <text x="10" y="34" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#64748B">cache/redis_cache.py</text>
+    <text x="10" y="48" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">Wraps redis.Redis client</text>
+    <text x="10" y="60" font-family="'Inter', sans-serif" font-size="7.5" fill="#065F46">Fail-open error handler</text>
+  </g>
+
+  <g transform="translate(610, 120)" filter="url(#eShadow)">
+    <rect width="165" height="70" rx="6" fill="#FFFFFF" stroke="#4F46E5" stroke-width="1.5" />
+    <text x="10" y="20" font-family="'Inter', sans-serif" font-size="9.5" font-weight="700" fill="#4F46E5">ChromaStore</text>
+    <text x="10" y="34" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#64748B">vectordb/chroma_store.py</text>
+    <text x="10" y="48" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">PersistentClient abstraction</text>
+    <text x="10" y="60" font-family="'Inter', sans-serif" font-size="7.5" fill="#4F46E5">Collection isolation</text>
+  </g>
+
+  <g transform="translate(610, 200)" filter="url(#eShadow)">
+    <rect width="165" height="65" rx="6" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.5" />
+    <text x="10" y="18" font-family="'Inter', sans-serif" font-size="9.5" font-weight="700" fill="#7C3AED">GeminiEmbedder</text>
+    <text x="10" y="32" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#64748B">embeddings/embedder.py</text>
+    <text x="10" y="46" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">Google GenAI SDK wrapper</text>
+    <text x="10" y="58" font-family="'Inter', sans-serif" font-size="7.5" fill="#7C3AED">Batching &amp; dim override</text>
+  </g>
+
+  <g transform="translate(610, 275)" filter="url(#eShadow)">
+    <rect width="165" height="65" rx="6" fill="#FFFFFF" stroke="#F59E0B" stroke-width="1.5" />
+    <text x="10" y="18" font-family="'Inter', sans-serif" font-size="9.5" font-weight="700" fill="#92400E">OpenRouterService</text>
+    <text x="10" y="32" font-family="'JetBrains Mono', monospace" font-size="7.5" fill="#64748B">llm/openrouter.py</text>
+    <text x="10" y="46" font-family="'Inter', sans-serif" font-size="7.5" fill="#475569">LangChain ChatOpenAI base</text>
+    <text x="10" y="58" font-family="'Inter', sans-serif" font-size="7.5" fill="#92400E">Retry on 429/5xx</text>
+  </g>
+</svg>
